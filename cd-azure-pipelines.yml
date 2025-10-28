@@ -4,12 +4,12 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  azureSubscription: 'HaoSubscriptionConn'      # your Azure DevOps service connection
+  azureSubscription: 'AzureConn'      # your Azure DevOps service connection
   aksResourceGroup: 'devop-aks'    # resource group of AKS
   aksCluster: 'devop-aks'             # AKS cluster name
   namespace: 'dev'
   containerRegistry: 'devopacr.azurecr.io'
-  deploymentContextPath: 'k8s_deployment'
+  deploymentContextPath: 'aks_deployment'
   tag: 'latest'
 
 steps:
