@@ -1,19 +1,25 @@
-trigger: none
+trigger: none   # Do not trigger the pipeline automatically; it must be run manually
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-latest'  # Use the latest Ubuntu image for the build agent
 
 variables:
-  azureSubscription: 'AzureConn'      # your Azure DevOps service connection
-  aksResourceGroup: 'devop-aks'    # resource group of AKS
-  aksCluster: 'devop-aks'             # AKS cluster name
+  # Azure DevOps service connection name
+  azureSubscription: 'AzureConn'
+  # Resource group containing the AKS cluster
+  aksResourceGroup: 'devop-aks'
+  # Name of the AKS cluster
+  aksCluster: 'devop-aks'
+  # Kubernetes namespace to deploy to
   namespace: 'dev'
+  #Azure Container Registry URL
   containerRegistry: 'devopacr.azurecr.io'
+  # Path to deployment YAML files
   deploymentContextPath: 'aks_deployment'
   tag: 'latest'
 
 steps:
-# Connect to AKS
+#Step 1: Connect to the AKS cluster using Azure CLI
 - task: AzureCLI@2
   displayName: 'Connect to AKS'
   inputs:
@@ -24,18 +30,19 @@ steps:
       az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksCluster) --overwrite-existing
       kubectl config current-context
 
-# Create namespace if not exists
+# Step 2: Create the namespace if it doesn't already exist
 - script: |
     kubectl get namespace $(namespace) || kubectl create namespace $(namespace)
     kubectl config set-context --current --namespace=$(namespace)
   displayName: 'Create namespace if not exists'
 
-# Database
+# Step 3: Deploy MongoDB (including storage class and PVC)
 - script: |
     echo "Create storageclass, pvc and database"
     kubectl apply -f $(deploymentContextPath)/mongodb.yaml
   displayName: 'Create storageclass, pvc and database'
 
+# Step 4: Verify MongoDB deployment and related resources
 - script: |
     echo -e "\nverify storage class"
     kubectl get sc
@@ -66,7 +73,7 @@ steps:
 
   displayName: 'Verify storageclass, pvc and database'
 
-# Backend
+# Step 5: Deploy backend application using environment substitution
 - script: |
     echo "Using registry: $(containerRegistry)"
     echo "Namespace: $(namespace)"
@@ -76,6 +83,7 @@ steps:
     envsubst < $(deploymentContextPath)/backend.yaml | kubectl apply -f -
   displayName: 'Deploy backend image to AKS'
 
+# Step 6: Verify backend pods and services
 - script: |
     echo "verify backend pods"
     kubectl get pods
@@ -84,7 +92,7 @@ steps:
     kubectl get svc
   displayName: 'Verify backend deployment'
 
-# Frontend
+# Step 7: Deploy frontend application
 - script: |
     echo "Using registry: $(containerRegistry)"
     echo "Namespace: $(namespace)"
@@ -94,6 +102,7 @@ steps:
     envsubst < $(deploymentContextPath)/frontend.yaml | kubectl apply -f -
   displayName: 'Deploy frontend image to AKS'
 
+# Step 8: Verify frontend pods and services
 - script: |
     echo "verify frontend pods"
     kubectl get pods
@@ -102,12 +111,13 @@ steps:
     kubectl get svc
   displayName: 'Verify frontend deployment'
 
-# Ingress
+# Step 9: Install NGINX ingress controller
 - script: |
     echo "install NGINX ingress controller"
     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/cloud/deploy.yaml
   displayName: 'Application Ingress'
 
+# Step 10: Verify ingress controller and deploy application ingress
 - script: |
     echo "verify ingress controller installation"
     kubectl get pods --namespace=ingress-nginx | grep nginx
