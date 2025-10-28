@@ -1,3 +1,5 @@
+
+#This Azure DevOps pipeline deploys a full-stack application (MongoDB, backend, frontend) to an AKS (Azure Kubernetes Service) cluster
 trigger: none   # Do not trigger the pipeline automatically; it must be run manually
 
 pool:
