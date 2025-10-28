@@ -6,7 +6,7 @@ pool:
   vmImage: 'ubuntu-latest'  # Use the latest Ubuntu image for the build agent
 
 variables:
-  # Azure DevOps Service Connection name
+  # Azure DevOps Service Connection name, please note that we also need to create a Service Connection for Github
   azureSubscription: 'AzureConn'
   # Resource group containing the AKS cluster
   aksResourceGroup: 'devop-aks'
