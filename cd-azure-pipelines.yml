@@ -4,7 +4,7 @@ pool:
   vmImage: 'ubuntu-latest'  # Use the latest Ubuntu image for the build agent
 
 variables:
-  # Azure DevOps service connection name
+  # Azure DevOps Service Connection name
   azureSubscription: 'AzureConn'
   # Resource group containing the AKS cluster
   aksResourceGroup: 'devop-aks'
@@ -14,8 +14,9 @@ variables:
   namespace: 'dev'
   #Azure Container Registry URL
   containerRegistry: 'devopacr.azurecr.io'
-  # Path to deployment YAML files
+  # Path to deployment YAML files, this is the folder on Github Repos
   deploymentContextPath: 'aks_deployment'
+  # Image tag to deploy
   tag: 'latest'
 
 steps:
@@ -28,6 +29,7 @@ steps:
     scriptLocation: 'inlineScript'
     inlineScript: |
       az aks get-credentials --resource-group $(aksResourceGroup) --name $(aksCluster) --overwrite-existing
+      #Show current Kubernetes context
       kubectl config current-context
 
 # Step 2: Create the namespace if it doesn't already exist
@@ -43,6 +45,11 @@ steps:
   displayName: 'Create storageclass, pvc and database'
 
 # Step 4: Verify MongoDB deployment and related resources
+#This step is a comprehensive health check for MongoDB deployment in Kubernetes. It ensures that:
+   #Storage is provisioned.
+   #Pods are running.
+   #Services are exposed.
+   #Configuration and secrets are correctly applied.
 - script: |
     echo -e "\nverify storage class"
     kubectl get sc
