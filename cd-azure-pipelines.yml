@@ -9,9 +9,9 @@ variables:
   # Azure DevOps Service Connection name, please note that we also need to create a Service Connection for Github
   azureSubscription: 'AzureConn'
   # Resource group containing the AKS cluster
-  aksResourceGroup: 'a1b2c3-aks'
+  aksResourceGroup: 'a1b2c3'
   # Name of the AKS cluster
-  aksCluster: 'devop-aks'
+  aksCluster: 'a1b2c3'
   # Kubernetes namespace to deploy to
   namespace: 'dev'
   #Azure Container Registry URL
